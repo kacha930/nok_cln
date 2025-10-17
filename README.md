@@ -19,3 +19,6 @@ npm run dev
 Demo credentials:
 - admin / 1234
 - nokia / wifi123
+
+
+Backend URL: http://localhost:5000/api/sim/status and http://localhost:5000/api/sim/unlock (mock server).

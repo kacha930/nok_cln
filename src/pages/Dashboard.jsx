@@ -15,14 +15,19 @@ function StatCard({ title, value, children }) {
 export default function Dashboard() {
   const navigate = useNavigate();
   const [showAlert, setShowAlert] = useState(false);
+  const [simStatus, setSimStatus] = useState('Unknown');
 
   useEffect(() => {
     if (localStorage.getItem('isLoggedIn') !== 'true') navigate('/login');
 
-    // show alert after short delay (optional)
-    const timer = setTimeout(() => {
-      setShowAlert(true);
-    }, 1200);
+    // Show alert after short delay
+    const timer = setTimeout(() => setShowAlert(true), 1200);
+
+    // Fetch SIM status from mock server
+    fetch('http://localhost:5000/api/sim/status', { credentials: 'include' })
+      .then(res => res.json())
+      .then(data => setSimStatus(data.status))
+      .catch(err => console.error('Error fetching SIM status:', err));
 
     return () => clearTimeout(timer);
   }, [navigate]);
@@ -36,7 +41,9 @@ export default function Dashboard() {
           <h2 className="text-lg font-semibold">
             Welcome back{user.username ? ', ' + user.username : ''}
           </h2>
-          <div className="text-xs text-gray-500">Your WiFi is online</div>
+          <div className="text-xs text-gray-500">
+            Your WiFi is online | SIM: {simStatus}
+          </div>
         </div>
         <div>
           <button
@@ -52,7 +59,7 @@ export default function Dashboard() {
         </div>
       </header>
 
-      {/* 🔵 Inline Alert (non-fullscreen) */}
+      {/* 🔵 Inline alert */}
       {showAlert && (
         <div className="relative mb-4 p-3 pl-4 pr-10 border-l-4 border-nokia-blue bg-blue-50 text-blue-900 rounded-md shadow-sm">
           <div className="flex items-start gap-3">
@@ -62,24 +69,18 @@ export default function Dashboard() {
                 If you suspect your SIM PIN is locked, you can unlock it from the SIM unlock page.
               </div>
             </div>
-
-            {/* CTA link inside the alert */}
             <div className="shrink-0 flex flex-col items-end">
               <Link
                 to="/sim-unlock"
                 className="inline-block bg-nokia text-white px-3 py-1 rounded-md text-sm font-medium hover:brightness-95"
-                aria-label="Go to SIM unlock page"
               >
                 Unlock SIM PIN
               </Link>
             </div>
           </div>
-
-          {/* Close X */}
           <button
             onClick={() => setShowAlert(false)}
             className="absolute right-3 top-2 text-blue-700 hover:text-blue-900 text-xl leading-none"
-            aria-label="Close alert"
           >
             ×
           </button>
