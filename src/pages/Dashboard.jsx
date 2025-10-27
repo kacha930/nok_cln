@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { motion } from 'framer-motion'; // 👈 Import Framer Motion
 import Navbar from '../shared/Navbar';
 
 function StatCard({ title, value, children }) {
@@ -20,14 +21,15 @@ export default function Dashboard() {
   useEffect(() => {
     if (localStorage.getItem('isLoggedIn') !== 'true') navigate('/login');
 
-    // Show alert after short delay
     const timer = setTimeout(() => setShowAlert(true), 1200);
 
-    // Fetch SIM status from mock server
     fetch('http://localhost:5000/api/sim/status', { credentials: 'include' })
       .then(res => res.json())
       .then(data => setSimStatus(data.status))
-      .catch(err => console.error('Error fetching SIM status:', err));
+      .catch(err => {
+        console.error('Error fetching SIM status:', err);
+        setSimStatus('Unavailable');
+      });
 
     return () => clearTimeout(timer);
   }, [navigate]);
@@ -35,7 +37,12 @@ export default function Dashboard() {
   const user = JSON.parse(localStorage.getItem('nokiaUser') || '{}');
 
   return (
-    <div className="app-shell p-4">
+    <motion.div
+      className="flex flex-col h-[100vh] bg-gray-50 max-w-[430px] mx-auto p-4 relative overflow-y-auto"
+      initial={{ opacity: 0, y: 30 }}     // 👈 start slightly below, invisible
+      animate={{ opacity: 1, y: 0 }}      // 👈 fade & slide up
+      transition={{ duration: 0.4, ease: 'easeOut' }} // 👈 smooth easing
+    >
       <header className="mb-4 flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold">
@@ -45,23 +52,26 @@ export default function Dashboard() {
             Your WiFi is online | SIM: {simStatus}
           </div>
         </div>
-        <div>
-          <button
-            className="text-sm text-gray-500"
-            onClick={() => {
-              localStorage.removeItem('isLoggedIn');
-              localStorage.removeItem('nokiaUser');
-              navigate('/login');
-            }}
-          >
-            Sign out
-          </button>
-        </div>
+        <button
+          className="text-sm text-gray-500"
+          onClick={() => {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('nokiaUser');
+            navigate('/login');
+          }}
+        >
+          Sign out
+        </button>
       </header>
 
       {/* 🔵 Inline alert */}
       {showAlert && (
-        <div className="relative mb-4 p-3 pl-4 pr-10 border-l-4 border-nokia-blue bg-blue-50 text-blue-900 rounded-md shadow-sm">
+        <motion.div
+          className="relative mb-4 p-3 pl-4 pr-10 border-l-4 border-nokia-blue bg-blue-50 text-blue-900 rounded-md shadow-sm"
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
           <div className="flex items-start gap-3">
             <div className="flex-1">
               <div className="font-medium">Your PIN may be locked.</div>
@@ -84,37 +94,17 @@ export default function Dashboard() {
           >
             ×
           </button>
-        </div>
+        </motion.div>
       )}
 
-      <main className="space-y-3">
-        <StatCard title="Internet" value="Connected">
-          <div className="text-sm text-gray-400 mt-2">WAN IP: 192.168.1.1</div>
-        </StatCard>
-
-        <div className="grid grid-cols-2 gap-3">
-          <StatCard title="Speed" value="120 Mbps" />
-          <StatCard title="Devices" value="8">
-            <Link to="/devices" className="text-sm text-blue-600 mt-2 inline-block">
-              View devices
-            </Link>
-          </StatCard>
-        </div>
-
-        <div className="mobile-card">
-          <h3 className="font-semibold mb-2">Quick Actions</h3>
-          <div className="flex gap-2">
-            <Link to="/settings" className="flex-1 bg-gray-100 rounded p-3 text-center">
-              WiFi Settings
-            </Link>
-            <Link to="/speed" className="flex-1 bg-gray-100 rounded p-3 text-center">
-              Speed Test
-            </Link>
-          </div>
-        </div>
-      </main>
-
-      <Navbar />
-    </div>
+      {/* Navbar */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.2 }}
+      >
+        <Navbar />
+      </motion.div>
+    </motion.div>
   );
 }
