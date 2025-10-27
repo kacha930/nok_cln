@@ -1,1 +1,12 @@
 @import "tailwindcss";
+
+/* 👇 Custom global styles (these override Tailwind defaults) */
+@layer base {
+  body {
+    @apply bg-gray-100 flex justify-center items-center h-screen;
+  }
+
+  #root {
+    @apply w-full max-w-[430px] h-screen bg-white rounded-2xl shadow-lg overflow-hidden;
+  }
+}
